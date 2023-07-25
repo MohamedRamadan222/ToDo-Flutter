@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:sqflite/sqflite.dart';
 import 'package:untitled/modules/archived_tasks/archived_tasks_screen.dart';
 import 'package:untitled/modules/done_tasks/done_tasks_screen.dart';
 import 'package:untitled/modules/new_tasks/new_tasks_screen.dart';
@@ -23,35 +24,28 @@ class _HomeLayoutState extends State<HomeLayout> {
   ];
 
   @override
-  Widget build(BuildContext context)
-  {
+  void initState() {
+    super.initState();
+
+    createDatabase();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-        titles[currentIndex],
+          titles[currentIndex],
         ),
       ),
       body: screen[currentIndex],
       floatingActionButton: FloatingActionButton(
-        onPressed: ()
-        {
-          // try
-          // {
-          //   var name = await getName();
-          //   print(name);
-          //   print('khaled');
-          //   throw('some err !!!');
-          // } catch(err)
-          // {
-          //   print('err ${err.toString()}');
-          // }
-          getName().then((value)
-          {
-          print(value);
-          print('khaled');
-          // throw('errr');
-          }).catchError((error)
-          {
+        onPressed: () {
+          getName().then((value) {
+            print(value);
+            print('khaled');
+            // throw('errr');
+          }).catchError((error) {
             print('error is ${error.toString()}');
           });
         },
@@ -66,9 +60,8 @@ class _HomeLayoutState extends State<HomeLayout> {
           setState(() {
             currentIndex = index;
           });
-
         },
-        items: [
+        items: const [
           BottomNavigationBarItem(
             icon: Icon(
               Icons.menu,
@@ -82,7 +75,7 @@ class _HomeLayoutState extends State<HomeLayout> {
             label: 'Done',
           ),
           BottomNavigationBarItem(
-            icon:  Icon(
+            icon: Icon(
               Icons.archive_outlined,
             ),
             label: 'Archived',
@@ -92,8 +85,34 @@ class _HomeLayoutState extends State<HomeLayout> {
     );
   }
 
-  Future<String> getName() async
-  {
+  Future<String> getName() async {
     return 'mohamed ramadan';
   }
+
+  void createDatabase() async {
+    var database = await openDatabase(
+      'db.db',
+      version: 1,
+      onCreate: (database, version) {
+        print('database created');
+        database
+            .execute('CREATE TABLE tasks (id INTEGER PRIMARY KEY,'
+                ' title TEXT,'
+                ' date TEXT,'
+                ' time TEXT,'
+                ' status TEXT)')
+            .then((value) => {
+                  print('table created'),
+                })
+            .catchError((error) {
+          print('error When Creating table ${error.toString()}');
+        });
+      },
+      onOpen: (database) {
+        print('database oppened');
+      },
+    );
+  }
+
+  void insertToDatabase() {}
 }

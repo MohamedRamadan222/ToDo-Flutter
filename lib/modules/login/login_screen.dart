@@ -56,13 +56,11 @@ class _LoginScreenState extends State<LoginScreen> {
                       controller: passWord,
                       label: 'password',
                       prefix: Icons.lock,
-                      suffix: isPassword ? Icons.visibility_off : Icons.visibility,
-
+                      suffix:
+                          isPassword ? Icons.visibility_off : Icons.visibility,
                       isPassword: isPassword,
-                      suffixPressed: ()
-                      {
-                        setState(()
-                        {
+                      suffixPressed: () {
+                        setState(() {
                           isPassword = !isPassword;
                         });
                       },

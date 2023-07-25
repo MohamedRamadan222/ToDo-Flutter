@@ -7,12 +7,12 @@ class BMIResultScreen extends StatelessWidget {
 
   BMIResultScreen({
     required this.result,
-  required this.ismale,
-  required this.age,
-});
+    required this.ismale,
+    required this.age,
+  });
   @override
   Widget build(BuildContext context) {
-    return  Scaffold(
+    return Scaffold(
       appBar: AppBar(
         title: Text(
           'BMI Result',
