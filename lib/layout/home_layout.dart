@@ -3,8 +3,11 @@ import 'package:sqflite/sqflite.dart';
 import 'package:untitled/modules/archived_tasks/archived_tasks_screen.dart';
 import 'package:untitled/modules/done_tasks/done_tasks_screen.dart';
 import 'package:untitled/modules/new_tasks/new_tasks_screen.dart';
+import 'package:untitled/shared/componentes/components.dart';
 
 class HomeLayout extends StatefulWidget {
+  const HomeLayout({super.key});
+
   @override
   State<HomeLayout> createState() => _HomeLayoutState();
 }
@@ -22,6 +25,12 @@ class _HomeLayoutState extends State<HomeLayout> {
     'Done Tasks',
     'Archived Tasks',
   ];
+  late Database database;
+  var scaffoldkey = GlobalKey<ScaffoldState>();
+  bool isButtomSheetShown = false;
+  IconData fabIon = Icons.edit;
+  var titleController = TextEditingController();
+  var timeCintroller = TextEditingController();
 
   @override
   void initState() {
@@ -33,6 +42,7 @@ class _HomeLayoutState extends State<HomeLayout> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: scaffoldkey,
       appBar: AppBar(
         title: Text(
           titles[currentIndex],
@@ -41,16 +51,63 @@ class _HomeLayoutState extends State<HomeLayout> {
       body: screen[currentIndex],
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          getName().then((value) {
-            print(value);
-            print('khaled');
-            // throw('errr');
-          }).catchError((error) {
-            print('error is ${error.toString()}');
-          });
+          if (isButtomSheetShown) {
+            Navigator.pop(context);
+            isButtomSheetShown = false;
+            setState(() {
+              fabIon = Icons.edit;
+            });
+          } else {
+            scaffoldkey.currentState?.showBottomSheet(
+              (context) => Container(
+                color: Colors.grey[100],
+                padding: const EdgeInsets.all(20.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    defaultFormField(
+                        controller: titleController,
+                        label: 'Task Title',
+                        prefix: Icons.title,
+                        validate: (String value) {
+                          if (value.isEmpty) {
+                            return 'title must not be empty';
+                          }
+                          return null;
+                        },
+                        type: TextInputType.datetime),
+                    const SizedBox(
+                      height: 15.0,
+                    ),
+                    defaultFormField(
+                        controller: timeCintroller,
+                        label: 'Task Time',
+                        prefix: Icons.watch_later_outlined,
+                        onTap: () {
+                          showTimePicker(
+                            context: context,
+                            initialTime: TimeOfDay.now(),
+                          ).then((value) => {print(value?.format(context))});
+                        },
+                        validate: (String value) {
+                          if (value.isEmpty) {
+                            return 'time must not be empty';
+                          }
+                          return null;
+                        },
+                        type: TextInputType.text),
+                  ],
+                ),
+              ),
+            );
+            isButtomSheetShown = true;
+            setState(() {
+              fabIon = Icons.add;
+            });
+          }
         },
         child: Icon(
-          Icons.add,
+          fabIon,
         ),
       ),
       bottomNavigationBar: BottomNavigationBar(
@@ -90,7 +147,7 @@ class _HomeLayoutState extends State<HomeLayout> {
   }
 
   void createDatabase() async {
-    var database = await openDatabase(
+    database = await openDatabase(
       'db.db',
       version: 1,
       onCreate: (database, version) {
@@ -105,7 +162,8 @@ class _HomeLayoutState extends State<HomeLayout> {
                   print('table created'),
                 })
             .catchError((error) {
-          print('error When Creating table ${error.toString()}');
+          // print('error When Creating table ${error.toString()}');
+          return error;
         });
       },
       onOpen: (database) {
@@ -114,5 +172,17 @@ class _HomeLayoutState extends State<HomeLayout> {
     );
   }
 
-  void insertToDatabase() {}
+  void insertToDatabase() {
+    database.transaction((txn) {
+      return txn
+          .rawInsert(
+        'INSERT INTO tasks(title, date, time, status) VALUES("first task", "2004", "445", "new")',
+      )
+          .then((value) {
+        print('$value inserted successfully');
+      }).catchError((error) {
+        print('error When Inserting new Record ${error.toString()}');
+      });
+    });
+  }
 }
