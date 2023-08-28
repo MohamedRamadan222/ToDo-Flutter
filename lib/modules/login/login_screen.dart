@@ -48,7 +48,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           return 'Email must not be empty';
                         }
                         return null;
-                      }),
+                      },
+                      lableText: null),
                   SizedBox(
                     height: 15.0,
                   ),
@@ -70,7 +71,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           return 'password must not be empty';
                         }
                         return null;
-                      }),
+                      },
+                      lableText: null),
                   SizedBox(
                     height: 15.0,
                   ),
